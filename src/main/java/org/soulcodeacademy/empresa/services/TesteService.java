@@ -3,6 +3,7 @@ package org.soulcodeacademy.empresa.services;
 import org.soulcodeacademy.empresa.domain.Dependente;
 import org.soulcodeacademy.empresa.domain.Empregado;
 import org.soulcodeacademy.empresa.domain.Endereco;
+import org.soulcodeacademy.empresa.domain.Projeto;
 import org.soulcodeacademy.empresa.repositories.DependenteRepository;
 import org.soulcodeacademy.empresa.repositories.EmpregadoRepository;
 import org.soulcodeacademy.empresa.repositories.EnderecoRepository;
@@ -11,25 +12,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class TesteService {
+
     @Autowired
     private EmpregadoRepository empregadoRepository;
-
     @Autowired
     private DependenteRepository dependenteRepository;
-
     @Autowired
     private EnderecoRepository enderecoRepository;
-
     @Autowired
     private ProjetoRepository projetoRepository;
 
-    @PostConstruct
-    public  void  testarEntidade() {
 
+    @PostConstruct
+    public void testarEntidades(){
         Empregado empregado1 = new Empregado(null, "José Carlos", "jc@gmail.com", 7000.0);
         Empregado empregado2 = new Empregado(null, "José Antonio", "ja@gmail.com", 8500.0);
         Empregado empregado3 = new Empregado(null, "Cláudio José", "cj@gmail.com", 8500.0);
@@ -38,14 +38,15 @@ public class TesteService {
         Endereco endereco2 = new Endereco(null, "São Paulo", "SP");
         Endereco endereco3 = new Endereco(null, "São Paulo", "SP");
 
+        //Associoação 1:1
         empregado1.setEndereco(endereco1);
         empregado2.setEndereco(endereco2);
         empregado3.setEndereco(endereco3);
 
         this.enderecoRepository.saveAll(List.of(endereco1, endereco2, endereco3));
-        this.empregadoRepository.saveAll(List.of(empregado1,empregado2,empregado3));
+        this.empregadoRepository.saveAll(List.of(empregado1, empregado2, empregado3));
 
-
+        //Associação 1:N
         Dependente dependente1 = new Dependente(null, "Maria Antonieta", 13);
         Dependente dependente2 = new Dependente(null, "Carlos José", 11);
         Dependente dependente3 = new Dependente(null, "Pedro Alves", 9);
@@ -55,5 +56,49 @@ public class TesteService {
         dependente3.setResponsavel(empregado1);
 
         this.dependenteRepository.saveAll(List.of(dependente1,dependente2,dependente3));
+
+            //Igualdade de objetoss
+        //          Quando usamos new alocamos o objeto em um endereço de memória
+       // Projeto projeto1 = new Projeto(1, "campanha I", 2500.0, "Descrição top");
+        //Projeto projeto2 = new Projeto(2, "campanha I", 2500.0, "Descrição top");
+
+       // if (projeto1.equals(projeto2)) { //Compara se são identicos, estão no mesmp local da memória
+         //   System.out.println("São iguais");
+
+        // }else {
+          //  System.out.println("nao são iguais");
+         //}
+        //System.out.println(projeto1.hashCode());
+        //System.out.println(projeto2.hashCode());
+
+        //List<Projeto> projetos = new ArrayList<>();
+        //System.out.println(projetos);
+        //Projeto projeto3 = new Projeto(2,"Campanha", 2500.0, "Descrição top");
+
+        // projetos.remove(projeto3);
+
+        //System.out.println(projetos);
+
+        // ASSOSIAÇÃO N:N
+        Projeto projeto1 = new Projeto(null,"Campanha de Marketin I",5000.0,"Campanha 1º semestre");
+        Projeto projeto2 = new Projeto(null,"Campanha de Marketin II",8500.0,"Campanha 2º semestre");
+
+        this.projetoRepository.saveAll(List.of(projeto1, projeto2));
+
+        empregado1.getProjetos().add(projeto1);
+        empregado1.getProjetos().add(projeto2);
+
+        empregado2.getProjetos().add(projeto2);
+
+        this.empregadoRepository.save(empregado1);
+        this.empregadoRepository.save(empregado2);
+
+        //Remove projeto do empregado
+        Empregado preguicoso = this.empregadoRepository.findById(2).orElseThrow();
+        System.out.println(preguicoso.getProjetos());
+        preguicoso.getProjetos().remove(projeto2);
+
+        this.empregadoRepository.save(preguicoso);
+
     }
 }
